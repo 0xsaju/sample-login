@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Profile</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #f4f6f9;
+            min-height: 100vh;
+        }
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 1rem 2rem;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        .settings-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #666;
+        }
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        .form-group input:focus, .form-group textarea:focus {
+            border-color: #764ba2;
+            outline: none;
+        }
+        .btn {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        .avatar-upload {
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        .current-avatar {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">Edit Profile</div>
+        <div>
+            <a href="{{ url_for('profile') }}" class="btn" style="margin-right: 10px;">View Profile</a>
+            <a href="{{ url_for('welcome') }}" class="btn">Dashboard</a>
+        </div>
+    </nav>
+    <div class="container">
+        <div class="settings-card">
+            <form method="post" enctype="multipart/form-data">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="avatar-upload">
+                    <img src="{{ user.avatar_url or url_for('static', filename='default-avatar.png') }}" 
+                         alt="Current Avatar" class="current-avatar">
+                    <input type="file" name="avatar" accept="image/*">
+                </div>
+                <div class="form-group">
+                    <label>First Name</label>
+                    <input type="text" name="first_name" value="{{ user.first_name or '' }}">
+                </div>
+                <div class="form-group">
+                    <label>Last Name</label>
+                    <input type="text" name="last_name" value="{{ user.last_name or '' }}">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" name="email" value="{{ user.email }}" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Phone</label>
+                    <input type="tel" name="phone" value="{{ user.phone or '' }}">
+                </div>
+                <div class="form-group">
+                    <label>Country</label>
+                    <input type="text" name="country" value="{{ user.country or '' }}">
+                </div>
+                <div class="form-group">
+                    <label>Bio</label>
+                    <textarea name="bio" rows="4">{{ user.bio or '' }}</textarea>
+                </div>
+                <button type="submit" class="btn">Save Changes</button>
+                {% with messages = get_flashed_messages() %}
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="msg">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+            </form>
+            <hr style="margin: 2rem 0; border: none; border-top: 2px solid #eee;">
+            <h3 style="margin-bottom: 1.5rem; color: #333;">Change Password</h3>
+            <form method="post" action="{{ url_for('change_password') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="form-group">
+                    <label>Current Password</label>
+                    <input type="password" name="current_password" required>
+                </div>
+                <div class="form-group">
+                    <label>New Password</label>
+                    <input type="password" name="new_password" required minlength="8">
+                    <div class="requirements">
+                        Password must be at least 8 characters long and contain letters, numbers, and special characters
+                    </div>
+                </div>
+                <button type="submit" class="btn">Update Password</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

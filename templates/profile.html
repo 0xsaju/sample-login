@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Profile</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #f4f6f9;
+            min-height: 100vh;
+        }
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 1rem 2rem;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        .profile-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        .avatar {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .profile-info h1 {
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+        .profile-info p {
+            color: #666;
+        }
+        .profile-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        .detail-item {
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        .detail-label {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+        .detail-value {
+            color: #333;
+            font-weight: 500;
+        }
+        .btn {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: transform 0.2s;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">Profile</div>
+        <div>
+            <a href="{{ url_for('profile_settings') }}" class="btn" style="margin-right: 10px;">Edit Profile</a>
+            <a href="{{ url_for('welcome') }}" class="btn" style="margin-right: 10px;">Dashboard</a>
+            <form action="{{ url_for('logout') }}" method="post" style="display: inline;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn">Logout</button>
+            </form>
+        </div>
+    </nav>
+    <div class="container">
+        <div class="profile-card">
+            <div class="profile-header">
+                <img src="{{ user.avatar_url or url_for('static', filename='default-avatar.png') }}" alt="Profile Picture" class="avatar">
+                <div class="profile-info">
+                    <h1>{{ user.first_name }} {{ user.last_name }}</h1>
+                    <p>@{{ user.username }}</p>
+                </div>
+            </div>
+            <div class="profile-details">
+                <div class="detail-item">
+                    <div class="detail-label">Email</div>
+                    <div class="detail-value">{{ user.email }}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Phone</div>
+                    <div class="detail-value">{{ user.phone or 'Not set' }}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Country</div>
+                    <div class="detail-value">{{ user.country or 'Not set' }}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Member Since</div>
+                    <div class="detail-value">{{ user.created_at.strftime('%B %Y') }}</div>
+                </div>
+            </div>
+            {% if user.bio %}
+            <div class="detail-item" style="margin-top: 1.5rem;">
+                <div class="detail-label">Bio</div>
+                <div class="detail-value">{{ user.bio }}</div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,43 @@
+# Environment variables and virtual environments
+.env
+.venv
+venv/
+ENV/
+env/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# IDEs and editors
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Project specific
+static/uploads/
+instance/
+*.db
+*.sqlite3
+*.log
+
+# Flask
+flask_session/
