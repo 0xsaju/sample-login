@@ -1,0 +1,9 @@
+controller:
+  service:
+    type: NodePort
+  admissionWebhooks:
+    enabled: false
+  metrics:
+    enabled: false
+  podSecurityPolicy:
+    enabled: false
