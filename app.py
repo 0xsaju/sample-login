@@ -400,10 +400,10 @@ def profile_settings():
     cursor.close()
     return render_template('profile_settings.html', user=user)
 
-
-if __name__ == '__main__':
-    app.run(debug=True)
-
+@app.route('/health')
+def health():
+    try:
+        # Check database connection
         cursor = mysql.connection.cursor()
         cursor.execute('SELECT 1')
         cursor.close()
@@ -412,4 +412,4 @@ if __name__ == '__main__':
         return {'status': 'unhealthy', 'error': str(e)}, 500
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=False)  # Modified to bind to all interfaces

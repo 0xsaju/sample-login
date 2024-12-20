@@ -56,16 +56,18 @@ spec:
             httpGet:
               path: /health
               port: 5000  # Fixed port number
-            initialDelaySeconds: 30
-            periodSeconds: 10
+            initialDelaySeconds: 60  # Increased delay
+            periodSeconds: 15
             timeoutSeconds: 5
-            failureThreshold: 3
+            failureThreshold: 6
           readinessProbe:
             httpGet:
               path: /health
               port: 5000
-            initialDelaySeconds: 5
-            periodSeconds: 5
+            initialDelaySeconds: 30  # Increased delay
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
           env:
             - name: FLASK_APP
               value: "app.py"
