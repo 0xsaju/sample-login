@@ -50,11 +50,17 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /var/lib/mysql
+            - name: init-script
+              mountPath: /docker-entrypoint-initdb.d
           resources:
             {{- toYaml .Values.mysql.resources | nindent 12 }}
           securityContext:
             runAsUser: 999
             runAsNonRoot: true
+      volumes:
+        - name: init-script
+          configMap:
+            name: {{ .Values.app.name }}-init-sql
   volumeClaimTemplates:
     - metadata:
         name: data

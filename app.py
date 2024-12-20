@@ -31,10 +31,10 @@ app.config.update(
 
 # MySQL configurations
 app.config.update(
-    MYSQL_HOST = 'localhost',
-    MYSQL_USER = 'root',
-    MYSQL_PASSWORD = 'AppDBPass',
-    MYSQL_DB = 'sample_login'
+    MYSQL_HOST = os.getenv('MYSQL_HOST', 'localhost'),
+    MYSQL_USER = os.getenv('MYSQL_USER', 'root'),
+    MYSQL_PASSWORD = os.getenv('MYSQL_PASSWORD', 'AppDBPass'),
+    MYSQL_DB = os.getenv('MYSQL_DB', 'sample_login')
 )
 
 mysql = MySQL(app)
@@ -400,6 +400,16 @@ def profile_settings():
     cursor.close()
     return render_template('profile_settings.html', user=user)
 
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
+        cursor = mysql.connection.cursor()
+        cursor.execute('SELECT 1')
+        cursor.close()
+        return {'status': 'healthy'}, 200
+    except Exception as e:
+        return {'status': 'unhealthy', 'error': str(e)}, 500
 
 if __name__ == '__main__':
     app.run(debug=True)
