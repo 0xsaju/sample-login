@@ -5,7 +5,7 @@ metadata:
   name: {{ .Values.app.name }}-uploads-pvc
 spec:
   accessModes:
-    - ReadWriteMany
+    - ReadWriteOnce  # Changed from ReadWriteMany
   resources:
     requests:
       storage: {{ .Values.app.uploads.size }}
