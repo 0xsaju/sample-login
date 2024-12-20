@@ -11,7 +11,7 @@ app:
     port: 5000
   resources:
     limits:
-      cpu: 500m      # Increase for production
+      cpu: 300m      # Changed value to trigger sync
       memory: 512Mi
     requests:
       cpu: 200m

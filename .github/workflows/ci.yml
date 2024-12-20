@@ -12,8 +12,13 @@ env:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Add this permission
     steps:
       - uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.PAT_TOKEN }}  # Updated to match repo secret name
+          fetch-depth: 0  # Fetch all history
       
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
@@ -39,9 +44,12 @@ jobs:
           sed -i "s|tag: .*|tag: ${{ github.sha }}|" helm/values-prod.yaml
 
       - name: Commit and push changes
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}  # Updated to match repo secret name
         run: |
-          git config --global user.name 'GitHub Actions'
+          git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}
           git add helm/values-prod.yaml
           git commit -m "Update image tag to ${{ github.sha }}" || echo "No changes to commit"
           git push
