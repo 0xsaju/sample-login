@@ -17,6 +17,11 @@ spec:
     helm:
       valueFiles:
         - values-prod.yaml
+      parameters:
+        - name: mysql.persistence.storageClass
+          value: local-path
+        - name: app.uploads.storageClass
+          value: local-path
   destination:
     server: https://kubernetes.default.svc
     namespace: sample-login
