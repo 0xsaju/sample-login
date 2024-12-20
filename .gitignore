@@ -46,8 +46,7 @@ flask_session/
 .dockerfile
 
 # Secrets
-**/secrets/
-**/*secret*.yaml
+**/secrets
 **/.env
 
 # Kubernetes
