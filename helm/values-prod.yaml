@@ -4,7 +4,7 @@ app:
   name: sample-login
   image:
     repository: 0xsaju/sample-login
-    tag: b739b16e3c376fe0c2468f32d27622425d6d6f47
+    tag: e4b5dcc09f0f190443121d71684a378e08dd4b49
     pullPolicy: Always
   service:
     type: ClusterIP
@@ -36,7 +36,7 @@ ingress:
 mysql:
   image:
     repository: 0xsaju/sample-login
-    tag: b739b16e3c376fe0c2468f32d27622425d6d6f47
+    tag: e4b5dcc09f0f190443121d71684a378e08dd4b49
   rootPassword: "mysecretpassword"  # Set a default password for testing
   database: sample_login
   service:
