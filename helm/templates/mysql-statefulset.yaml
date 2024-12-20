@@ -2,6 +2,9 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: {{ .Values.app.name }}-mysql
+  labels:
+    app.kubernetes.io/name: {{ .Values.app.name }}-mysql
+    app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   serviceName: {{ .Values.app.name }}-mysql
   replicas: 1
@@ -12,7 +15,11 @@ spec:
     metadata:
       labels:
         app: {{ .Values.app.name }}-mysql
+        app.kubernetes.io/name: {{ .Values.app.name }}-mysql
+        app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
+      securityContext:
+        fsGroup: 999
       containers:
         - name: mysql
           image: "{{ .Values.mysql.image.repository }}:{{ .Values.mysql.image.tag }}"
@@ -37,6 +44,9 @@ spec:
             limits:
               memory: "512Mi"
               cpu: "500m"
+          securityContext:
+            runAsUser: 999
+            runAsNonRoot: true
   volumeClaimTemplates:
     - metadata:
         name: data
