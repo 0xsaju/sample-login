@@ -3,6 +3,9 @@ kind: Application
 metadata:
   name: sample-login
   namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
   project: default
   source:

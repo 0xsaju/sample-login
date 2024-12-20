@@ -27,7 +27,7 @@ ingress:
     nginx.ingress.kubernetes.io/rewrite-target: /
     cert-manager.io/cluster-issuer: letsencrypt-prod
   hosts:
-    - host: login.example.com
+    - host: "login.example.com"  # Make sure this is quoted
       paths:
         - path: /
           pathType: Prefix
