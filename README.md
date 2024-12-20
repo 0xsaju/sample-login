@@ -1,6 +1,9 @@
 # Modern Login System
 
-A modern and secure login system built with Flask, featuring email verification, password reset, and profile management.
+A modern, secure, and containerized login system built with Flask, featuring Kubernetes deployment and GitOps practices.
+
+## Architecture
+![System Architecture](architecture/sample_login_application_architecture.png)
 
 ## Features
 
@@ -9,7 +12,6 @@ A modern and secure login system built with Flask, featuring email verification,
   - CSRF protection
   - Session management
   - Password history tracking
-  - Previous password reuse prevention
 
 - ✉️ Email Features
   - Email verification
@@ -20,24 +22,39 @@ A modern and secure login system built with Flask, featuring email verification,
   - Profile customization
   - Avatar upload
   - Profile completion tracking
-  - Password change functionality
 
 - 🛡️ Security Features
   - SQL injection prevention
   - XSS protection
-  - Secure password policies
   - Rate limiting
   - Session timeout
 
+- 🚀 DevOps Features
+  - Containerized application
+  - Kubernetes deployment
+  - GitOps with ArgoCD
+  - CI/CD with GitHub Actions
+  - Helm charts for deployment
+  - High availability setup
+  - Health monitoring
+
 ## Tech Stack
 
+### Application
 - Backend: Python/Flask
 - Database: MySQL
 - Frontend: HTML5, CSS3
-- Email: Flask-Mail
 - Security: Flask-WTF, Werkzeug
 
-## Installation
+### Infrastructure
+- Container Runtime: Docker
+- Orchestration: Kubernetes (K3s)
+- CI/CD: GitHub Actions
+- GitOps: ArgoCD
+- Package Manager: Helm
+- Ingress: Nginx
+
+## Local Development
 
 1. Clone the repository
 ```bash
@@ -47,10 +64,8 @@ cd sample-login
 
 2. Create virtual environment
 ```bash
-python -m venv venv
-source venv/bin/activate  # Linux/Mac
-# or
-venv\Scripts\activate  # Windows
+python -m venv .venv
+source .venv/bin/activate
 ```
 
 3. Install dependencies
@@ -58,44 +73,56 @@ venv\Scripts\activate  # Windows
 pip install -r requirements.txt
 ```
 
-4. Set up environment variables in `.env`
-```env
-MAIL_USERNAME=your_email@gmail.com
-MAIL_PASSWORD=your_app_password
+4. Set up environment variables
+```bash
+cp .env.example .env
+# Edit .env with your configurations
 ```
 
-5. Initialize database
+5. Run locally
 ```bash
-mysql -u root -p sample_login < initial.sql
+flask run
 ```
 
-6. Run the application
+## Production Deployment
+
+Please refer to [deployment.md](deployment.md) for detailed deployment instructions.
+
+### Quick Start
 ```bash
-python app.py
+# Install required tools
+curl -sfL https://get.k3s.io | sh -
+kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+
+# Deploy application
+kubectl create namespace sample-login
+kubectl apply -f k8s/argocd/application.yaml
 ```
 
 ## Project Structure
 
 ```
 sample-login/
-├── app.py                 # Main application file
-├── initial.sql           # Database schema
-├── requirements.txt      # Project dependencies
-├── static/              # Static files
-│   └── uploads/        # User uploads
-└── templates/          # HTML templates
-    ├── index.html     # Login page
-    ├── register.html  # Registration page
-    ├── profile.html   # User profile
-    └── ...
+├── architecture/          # Architecture diagrams and system design
+│   └── system_diagram.py # System architecture generator
+├── helm/                 # Helm charts for Kubernetes deployment
+│   ├── templates/       # Kubernetes manifests
+│   ├── Chart.yaml      # Helm chart definition
+│   ├── values.yaml     # Default configuration
+│   └── values-prod.yaml# Production configuration
+├── k8s/                 # Kubernetes configurations
+│   └── argocd/         # ArgoCD application manifests
+├── .github/             # GitHub configurations
+│   └── workflows/      # CI/CD pipeline definitions
+├── static/             # Static assets
+│   └── uploads/       # User uploaded files
+├── templates/          # HTML templates
+├── app.py             # Main application file
+├── Dockerfile         # Container definition
+├── docker-entrypoint.sh # Container entrypoint
+├── requirements.txt   # Python dependencies
+└── deployment.md      # Deployment documentation
 ```
-
-## Configuration
-
-- Database settings in `app.py`
-- Email settings in `.env`
-- File upload settings in `app.py`
-- Session configuration in `app.py`
 
 ## Contributing
 
@@ -105,14 +132,18 @@ sample-login/
 4. Push to the branch
 5. Open a pull request
 
-## Future Improvements
+See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
 
-- [ ] CI/CD integration
-- [ ] Docker containerization
-- [ ] OAuth integration
-- [ ] Two-factor authentication
-- [ ] API endpoints
-- [ ] Unit tests
+## Production Readiness
+
+- ✅ Container security scanning
+- ✅ Automated testing
+- ✅ High availability setup
+- ✅ Health monitoring
+- ✅ Resource management
+- ✅ Secrets management
+- ✅ Database backups
+- ✅ Rolling updates
 
 ## Author
 
@@ -120,4 +151,4 @@ sample-login/
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details

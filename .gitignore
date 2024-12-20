@@ -41,3 +41,6 @@ instance/
 
 # Flask
 flask_session/
+
+# Docker
+.dockerfile

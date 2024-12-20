@@ -1,0 +1,52 @@
+replicaCount: 2
+
+app:
+  name: sample-login
+  image:
+    repository: 0xsaju/sample-login-app
+    tag: latest
+    pullPolicy: Always
+  service:
+    type: ClusterIP
+    port: 5000
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 200m
+      memory: 256Mi
+  uploads:
+    size: 5Gi
+    storageClass: standard
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  hosts:
+    - host: login.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+
+mysql:
+  image:
+    repository: mysql
+    tag: 8.0
+  rootPassword: ${MYSQL_ROOT_PASSWORD}
+  database: sample_login
+  service:
+    port: 3306
+  persistence:
+    size: 10Gi
+    storageClass: standard
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+    requests:
+      cpu: 500m
+      memory: 512Mi

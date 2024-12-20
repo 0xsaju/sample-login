@@ -1,0 +1,44 @@
+replicaCount: 2
+
+app:
+  name: sample-login
+  image:
+    repository: sample-login
+    tag: latest
+    pullPolicy: Always
+  service:
+    type: ClusterIP
+    port: 5000
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 200m
+      memory: 256Mi
+  uploads:
+    size: 1Gi
+    storageClass: standard
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+  hosts:
+    - host: login.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+
+mysql:
+  image:
+    repository: mysql
+    tag: 8.0
+  rootPassword: AppDBPass
+  database: sample_login
+  service:
+    port: 3306
+  persistence:
+    size: 1Gi
+    storageClass: standard
