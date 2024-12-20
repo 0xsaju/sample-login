@@ -1,9 +1,9 @@
-replicaCount: 2
+replicaCount: 1  # Reduced for testing
 
 app:
   name: sample-login
   image:
-    repository: 0xsaju/sample-login    # Verify this matches your Docker repository
+    repository: 0xsaju/sample-login
     tag: latest
     pullPolicy: Always
   service:
@@ -11,46 +11,42 @@ app:
     port: 5000
   resources:
     limits:
-      cpu: 500m
-      memory: 512Mi
+      cpu: 200m      # Reduced for testing
+      memory: 256Mi  # Reduced for testing
     requests:
-      cpu: 200m
-      memory: 256Mi
+      cpu: 100m      # Reduced for testing
+      memory: 128Mi  # Reduced for testing
   uploads:
-    size: 5Gi
-    storageClass: "local-path"    # Change to match your cluster's storage class
+    size: 1Gi
+    storageClass: "standard"  # Make sure this matches your cluster's storage class
 
 ingress:
   enabled: true
   className: nginx
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
-    cert-manager.io/cluster-issuer: letsencrypt-prod
   hosts:
-    - host: "login.example.com"  # Make sure this is quoted
+    - host: "login.example.com"
       paths:
         - path: /
           pathType: Prefix
-  tls:
-    - secretName: login-tls
-      hosts:
-        - login.example.com
+  tls: []  # Removed TLS for initial testing
 
 mysql:
   image:
     repository: mysql
     tag: 8.0
-  rootPassword: ""  # Should be set via external secrets management
+  rootPassword: "mysecretpassword"  # Set a default password for testing
   database: sample_login
   service:
     port: 3306
   persistence:
-    size: 10Gi
-    storageClass: "local-path"    # Change to match your cluster's storage class
+    size: 1Gi
+    storageClass: "standard"  # Make sure this matches your cluster's storage class
   resources:
     limits:
-      cpu: 1000m
-      memory: 1Gi
+      cpu: 500m      # Reduced for testing
+      memory: 512Mi  # Reduced for testing
     requests:
-      cpu: 500m
-      memory: 512Mi
+      cpu: 200m      # Reduced for testing
+      memory: 256Mi  # Reduced for testing
