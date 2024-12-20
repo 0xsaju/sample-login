@@ -4,7 +4,7 @@ FROM python:3.12-slim
 WORKDIR /app
 
 # Install system dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get update && apt-get install -y \
     default-libmysqlclient-dev \
     pkg-config \
     build-essential \
@@ -24,10 +24,6 @@ RUN mkdir -p /app/static/uploads && \
 
 # Set non-root user
 USER 1000
-
-# Add healthcheck
-HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:5000/health || exit 1
 
 # Expose port
 EXPOSE 5000

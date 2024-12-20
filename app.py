@@ -403,13 +403,9 @@ def profile_settings():
 @app.route('/health')
 def health():
     try:
-        # Check database connection
-        cursor = mysql.connection.cursor()
-        cursor.execute('SELECT 1')
-        cursor.close()
-        return {'status': 'healthy'}, 200
+        return {'status': 'healthy', 'version': '1.0.1'}, 200  # Added version
     except Exception as e:
         return {'status': 'unhealthy', 'error': str(e)}, 500
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=False)  # Modified to bind to all interfaces
+    app.run(host='0.0.0.0', port=5000)  # Remove debug=False

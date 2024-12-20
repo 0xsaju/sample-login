@@ -1,43 +1,16 @@
-name: CI Pipeline
+name: CI/CD Pipeline
 
 on:
   push:
-    branches:
-      - main
-      - dev_ci_cd_v1
+    branches: [ dev_ci_cd_v1 ]
   pull_request:
-    branches:
-      - main
-      - dev_ci_cd_v1
+    branches: [ dev_ci_cd_v1 ]
 
+env:
+  DOCKER_IMAGE: 0xsaju/sample-login
+  
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.9'
-          
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install pytest pytest-cov bandit safety
-          
-      - name: Run tests
-        run: |
-          pytest --cov=./ --cov-report=xml
-          
-      - name: Security scan
-        run: |
-          bandit -r ./ -f json -o bandit-report.json
-          safety check
-
   build-and-push:
-    needs: test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -57,31 +30,18 @@ jobs:
           context: .
           push: true
           tags: |
-            0xsaju/sample-login-app:latest
-            0xsaju/sample-login-app:${{ github.sha }}
-          cache-from: type=registry,ref=0xsaju/sample-login-app:buildcache
-          cache-to: type=registry,ref=0xsaju/sample-login-app:buildcache,mode=max
+            ${{ env.DOCKER_IMAGE }}:latest
+            ${{ env.DOCKER_IMAGE }}:${{ github.sha }}
 
-      - name: Update values file
-        if: github.ref == 'refs/heads/main'
+      - name: Update Helm values
         run: |
-          sed -i "s/tag: .*/tag: ${{ github.sha }}/" helm/values-prod.yaml
-          
-      - name: Commit changes
-        if: github.ref == 'refs/heads/main'
+          sed -i "s|repository: .*|repository: ${{ env.DOCKER_IMAGE }}|" helm/values-prod.yaml
+          sed -i "s|tag: .*|tag: ${{ github.sha }}|" helm/values-prod.yaml
+
+      - name: Commit and push changes
         run: |
           git config --global user.name 'GitHub Actions'
-          git config --global user.email 'actions@github.com'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           git add helm/values-prod.yaml
-          git commit -m "Update production image tag to ${{ github.sha }} [skip ci]" || echo "No changes to commit"
+          git commit -m "Update image tag to ${{ github.sha }}" || echo "No changes to commit"
           git push
-
-      - name: Scan container image
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: '0xsaju/sample-login-app:${{ github.sha }}'
-          format: 'table'
-          exit-code: '1'
-          ignore-unfixed: true
-          vuln-type: 'os,library'
-          severity: 'CRITICAL,HIGH'

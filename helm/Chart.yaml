@@ -2,8 +2,8 @@ apiVersion: v2
 name: sample-login
 description: A Flask login application with MySQL backend
 type: application
-version: 0.1.0
-appVersion: "1.0.0"
+version: 0.1.1
+appVersion: "1.0.1"
 icon: https://raw.githubusercontent.com/0xsaju/sample-login/main/app/static/icon.png
 
 sources:

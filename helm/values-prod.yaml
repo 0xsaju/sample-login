@@ -1,4 +1,4 @@
-replicaCount: 1  # Reduced for testing
+replicaCount: 2  # Increase for HA
 
 app:
   name: sample-login
@@ -11,13 +11,13 @@ app:
     port: 5000
   resources:
     limits:
-      cpu: 200m      # Reduced for testing
-      memory: 256Mi  # Reduced for testing
+      cpu: 500m      # Increase for production
+      memory: 512Mi
     requests:
-      cpu: 100m      # Reduced for testing
-      memory: 128Mi  # Reduced for testing
+      cpu: 200m
+      memory: 256Mi
   uploads:
-    size: 1Gi
+    size: 5Gi       # Increase for production
     storageClass: "local-path"  # Change to match your available storage class
 
 ingress:
@@ -42,12 +42,12 @@ mysql:
   service:
     port: 3306
   persistence:
-    size: 1Gi
+    size: 10Gi      # Increase for production
     storageClass: "local-path"  # Change to match your available storage class
   resources:
     limits:
-      cpu: 500m      # Reduced for testing
-      memory: 512Mi  # Reduced for testing
+      cpu: 1000m    # Increase for production
+      memory: 1Gi
     requests:
       cpu: 200m      # Reduced for testing
       memory: 256Mi  # Reduced for testing
