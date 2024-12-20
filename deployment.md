@@ -14,16 +14,27 @@
 - Docker Hub account
 - ArgoCD installed on the cluster
 
-## Step 1: Environment Setup
+## Step 1: Clone Repository
 
-### 1.1 Configure GitHub Secrets
+```bash
+# Clone the repository
+git clone https://github.com/0xsaju/sample-login.git
+cd sample-login
+
+# If you're using a specific branch
+git checkout dev_ci_cd_v1
+```
+
+## Step 2: Environment Setup
+
+### 2.1 Configure GitHub Secrets
 Add the following secrets to your GitHub repository:
 ```bash
 DOCKER_HUB_USERNAME=your-username
 DOCKER_HUB_TOKEN=your-token
 ```
 
-### 1.2 Install Required Tools
+### 2.2 Install Required Tools
 ```bash
 # Install kubectl
 curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
@@ -36,28 +47,28 @@ curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 curl -sfL https://get.k3s.io | sh -
 ```
 
-## Step 2: Cluster Preparation
+## Step 3: Cluster Preparation
 
-### 2.1 Install ArgoCD
+### 3.1 Install ArgoCD
 ```bash
 kubectl create namespace argocd
 kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 ```
 
-### 2.2 Install Ingress Controller
+### 3.2 Install Ingress Controller
 ```bash
 helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
 helm install ingress-nginx ingress-nginx/ingress-nginx
 ```
 
-### 2.3 Create Namespace
+### 3.3 Create Namespace
 ```bash
 kubectl create namespace sample-login
 ```
 
-## Step 3: ArgoCD Setup
+## Step 4: ArgoCD Setup
 
-### 3.1 Access ArgoCD UI
+### 4.1 Access ArgoCD UI
 ```bash
 # Get ArgoCD admin password
 kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
@@ -66,19 +77,19 @@ kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.pas
 kubectl port-forward svc/argocd-server -n argocd 8080:443
 ```
 
-### 3.2 Configure ArgoCD Application
+### 4.2 Configure ArgoCD Application
 ```bash
 kubectl apply -f k8s/argocd/application.yaml
 ```
 
-## Step 4: Database Initialization
+## Step 5: Database Initialization
 
-### 4.1 Wait for MySQL StatefulSet
+### 5.1 Wait for MySQL StatefulSet
 ```bash
 kubectl -n sample-login wait --for=condition=ready pod -l app=sample-login-mysql
 ```
 
-### 4.2 Initialize Database (if needed)
+### 5.2 Initialize Database (if needed)
 ```bash
 # Port forward MySQL service
 kubectl -n sample-login port-forward svc/sample-login-mysql 3306:3306
@@ -87,33 +98,33 @@ kubectl -n sample-login port-forward svc/sample-login-mysql 3306:3306
 kubectl -n sample-login exec -it deploy/sample-login -- flask db upgrade
 ```
 
-## Step 5: Verify Deployment
+## Step 6: Verify Deployment
 
-### 5.1 Check Application Status
+### 6.1 Check Application Status
 ```bash
 kubectl -n sample-login get pods,svc,ingress
 ```
 
-### 5.2 Access Application
+### 6.2 Access Application
 ```bash
 # Get Ingress IP/Hostname
 export INGRESS_HOST=$(kubectl -n sample-login get ingress sample-login -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
 echo "Access application at: http://$INGRESS_HOST"
 ```
 
-## Step 6: Monitoring and Maintenance
+## Step 7: Monitoring and Maintenance
 
-### 6.1 View Application Logs
+### 7.1 View Application Logs
 ```bash
 kubectl -n sample-login logs -l app=sample-login -f
 ```
 
-### 6.2 Check Resource Usage
+### 7.2 Check Resource Usage
 ```bash
 kubectl -n sample-login top pods
 ```
 
-### 6.3 Scale Application
+### 7.3 Scale Application
 ```bash
 kubectl -n sample-login scale deployment sample-login --replicas=3
 ```
