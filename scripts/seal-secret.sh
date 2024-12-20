@@ -4,16 +4,27 @@ set -e
 # Source environment variables
 source .env
 
-# Base64 encode the PAT
-GITHUB_PAT_B64=$(echo -n "$GITHUB_PAT" | base64)
+# Create regular secret
+cat <<EOF > temp-secret.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: github-pat
+  namespace: argocd
+  labels:
+    argocd.argoproj.io/secret-type: repository
+type: Opaque
+stringData:
+  type: git
+  url: https://github.com/0xsaju/sample-login.git
+  username: 0xsaju
+  password: $GITHUB_PAT
+EOF
 
-# Replace in template and create temporary file
-sed "s/\${GITHUB_PAT}/$GITHUB_PAT_B64/" k8s/argocd/repo-secret.yaml > temp-secret.yaml
-
-# Create sealed secret
+# Seal the secret
 kubeseal \
   --controller-namespace=kube-system \
-  --controller-name=sealed-secrets-controller \
+  --scope cluster-wide \
   --format yaml \
   < temp-secret.yaml > k8s/argocd/sealed-repo-secret.yaml
 
