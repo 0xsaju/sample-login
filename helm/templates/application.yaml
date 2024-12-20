@@ -46,10 +46,16 @@ spec:
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
+      nodeSelector:
+        kubernetes.io/hostname: master
+      initContainers:
+        - name: wait-for-mysql
+          image: busybox:1.28
+          command: ['sh', '-c', 'until nc -z {{ .Values.app.name }}-mysql 3306; do echo waiting for mysql; sleep 2; done;']
       containers:
         - name: {{ .Values.app.name }}
           image: "{{ .Values.app.image.repository }}:{{ .Values.app.image.tag }}"
-          imagePullPolicy: {{ .Values.app.image.pullPolicy }}
+          imagePullPolicy: Always  # Force pull new images
           resources:
             {{- toYaml .Values.app.resources | nindent 12 }}
           livenessProbe:
