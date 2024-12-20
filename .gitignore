@@ -44,3 +44,11 @@ flask_session/
 
 # Docker
 .dockerfile
+
+# Secrets
+**/secrets/
+**/*secret*.yaml
+**/.env
+
+# Kubernetes
+**/kubeconfig

@@ -12,16 +12,11 @@ spec:
   project: default
   source:
     repoURL: https://github.com/0xsaju/sample-login.git
-    targetRevision: HEAD
+    targetRevision: dev_ci_cd_v1
     path: helm
     helm:
       valueFiles:
         - values-prod.yaml
-      parameters:
-        - name: mysql.persistence.storageClass
-          value: local-path
-        - name: app.uploads.storageClass
-          value: local-path
   destination:
     server: https://kubernetes.default.svc
     namespace: sample-login
