@@ -40,6 +40,7 @@ jobs:
 
       - name: Update Helm values
         run: |
+          git pull --rebase origin dev_ci_cd_v1
           sed -i "s|repository: .*|repository: ${{ env.DOCKER_IMAGE }}|" helm/values-prod.yaml
           sed -i "s|tag: .*|tag: ${{ github.sha }}|" helm/values-prod.yaml
 
@@ -51,5 +52,5 @@ jobs:
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}
           git add helm/values-prod.yaml
-          git commit -m "Update image tag to ${{ github.sha }}" || echo "No changes to commit"
-          git push
+          git commit -m "chore: update image tag to ${{ github.sha }} [skip ci]" || echo "No changes to commit"
+          git push --force-with-lease
