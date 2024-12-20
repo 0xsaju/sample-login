@@ -14,18 +14,18 @@ metadata:
   labels:
     argocd.argoproj.io/secret-type: repository
 type: Opaque
-stringData:
-  type: git
-  url: https://github.com/0xsaju/sample-login.git
-  username: 0xsaju
-  password: $GITHUB_PAT
+data:
+  url: $(echo -n "https://github.com/0xsaju/sample-login.git" | base64)
+  username: $(echo -n "0xsaju" | base64)
+  password: $(echo -n "$GITHUB_PAT" | base64)
+  type: $(echo -n "git" | base64)
 EOF
 
-# Seal the secret
+# Create sealed secret
 kubeseal \
   --controller-namespace=kube-system \
-  --scope cluster-wide \
   --format yaml \
+  --cert-file <(kubectl get secret -n kube-system -l sealedsecrets.bitnami.com/sealed-secrets-key -o yaml) \
   < temp-secret.yaml > k8s/argocd/sealed-repo-secret.yaml
 
 # Clean up
