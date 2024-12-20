@@ -18,7 +18,7 @@ app:
       memory: 128Mi  # Reduced for testing
   uploads:
     size: 1Gi
-    storageClass: "local-path"  # Change this to match your cluster's storage class
+    storageClass: "local-path"  # Change to match your available storage class
 
 ingress:
   enabled: true
@@ -43,7 +43,7 @@ mysql:
     port: 3306
   persistence:
     size: 1Gi
-    storageClass: "local-path"  # Change this to match your cluster's storage class
+    storageClass: "local-path"  # Change to match your available storage class
   resources:
     limits:
       cpu: 500m      # Reduced for testing
