@@ -35,19 +35,19 @@ ingress:
 
 mysql:
   image:
-    repository: 0xsaju/sample-login
-    tag: 14906fb61e3b9b86ea05c006674bf760bba98d44
-  rootPassword: "mysecretpassword"  # Set a default password for testing
+    repository: mysql
+    tag: "8.0"  # Use specific version
+  rootPassword: "mysecretpassword"
   database: sample_login
   service:
     port: 3306
   persistence:
-    size: 10Gi      # Increase for production
-    storageClass: "local-path"  # Change to match your available storage class
+    size: 1Gi      # Reduced for testing
+    storageClass: "local-path"
   resources:
     limits:
-      cpu: 1000m    # Increase for production
-      memory: 1Gi
+      cpu: 500m    # Reduced for testing
+      memory: 512Mi
     requests:
-      cpu: 200m      # Reduced for testing
-      memory: 256Mi  # Reduced for testing
+      cpu: 200m
+      memory: 256Mi

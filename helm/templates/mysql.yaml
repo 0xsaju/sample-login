@@ -37,7 +37,7 @@ spec:
         kubernetes.io/hostname: master
       containers:
         - name: mysql
-          image: "{{ .Values.mysql.image.repository }}:{{ .Values.mysql.image.tag }}"
+          image: "mysql:8.0"  # Change to official MySQL image
           ports:
             - containerPort: 3306
               name: mysql
@@ -49,6 +49,8 @@ spec:
                   key: mysql-root-password
             - name: MYSQL_DATABASE
               value: {{ .Values.mysql.database }}
+            - name: MYSQL_USER
+              value: root
           volumeMounts:
             - name: data
               mountPath: /var/lib/mysql
@@ -63,19 +65,28 @@ spec:
               memory: "256Mi"
           startupProbe:
             exec:
-              command: ["mysqladmin", "ping", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
-            initialDelaySeconds: 30
+              command: 
+                - /bin/sh
+                - -c
+                - "mysqladmin ping -u root -p${MYSQL_ROOT_PASSWORD}"
+            initialDelaySeconds: 60
             periodSeconds: 10
             failureThreshold: 30
           readinessProbe:
             exec:
-              command: ["mysqladmin", "ping", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+              command:
+                - /bin/sh
+                - -c
+                - "mysqladmin ping -u root -p${MYSQL_ROOT_PASSWORD}"
             initialDelaySeconds: 20
             periodSeconds: 10
             timeoutSeconds: 5
           livenessProbe:
             exec:
-              command: ["mysqladmin", "ping", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+              command:
+                - /bin/sh
+                - -c
+                - "mysqladmin ping -u root -p${MYSQL_ROOT_PASSWORD}"
             initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 5
