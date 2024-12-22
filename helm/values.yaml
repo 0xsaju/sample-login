@@ -25,7 +25,7 @@ ingress:
   className: nginx
   annotations: {}  # Changed to empty map
   hosts:
-    - host: login.example.com
+    - host: 192.168.56.101
       paths:
         - path: /
           pathType: Prefix
