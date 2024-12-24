@@ -1,29 +1,27 @@
-replicaCount: 2  # Increase for HA
-
+replicaCount: 2 # Increase for HA
 app:
   name: sample-login
   image:
     repository: 0xsaju/sample-login
-    tag: 4d7cb63a9055671d95407427be527704f87ebc8b
+    tag: c4501385c68f5ae7d764ab170f9e3786d6bbc094
     pullPolicy: Always
   service:
     type: ClusterIP
     port: 5000
   resources:
     limits:
-      cpu: 300m      # Changed value to trigger sync
+      cpu: 300m # Changed value to trigger sync
       memory: 512Mi
     requests:
       cpu: 200m
       memory: 256Mi
   uploads:
-    size: 5Gi       # Increase for production
-    storageClass: "local-path"  # Change to match your available storage class
+    size: 5Gi # Increase for production
+    storageClass: "local-path" # Change to match your available storage class
   env:
     MYSQL_HOST: "sample-login-mysql.sample-login.svc.cluster.local"
     MYSQL_PORT: "3306"
     MYSQL_DATABASE: "sample_login"
-
 ingress:
   enabled: true
   className: nginx
@@ -31,15 +29,14 @@ ingress:
     kubernetes.io/ingress.class: nginx
     nginx.ingress.kubernetes.io/rewrite-target: /
   hosts:
-    - host: "192.168.56.101"  # You can use your node IP instead for testing
+    - host: "192.168.56.101" # You can use your node IP instead for testing
       paths:
         - path: /
           pathType: Prefix
-  tls: []  # Removed TLS for initial testing
-
+  tls: [] # Removed TLS for initial testing
 mysql:
   image:
-    repository: mysql  # Fix: don't use sample-login repository
+    repository: mysql # Fix: don't use sample-login repository
     tag: "8.0"
   rootPassword: "mysecretpassword"
   database: sample_login
@@ -48,11 +45,11 @@ mysql:
     annotations:
       service.kubernetes.io/topology-aware-hints: auto
   persistence:
-    size: 1Gi      # Reduced for testing
+    size: 1Gi # Reduced for testing
     storageClass: "local-path"
   resources:
     limits:
-      cpu: 500m    # Reduced for testing
+      cpu: 500m # Reduced for testing
       memory: 512Mi
     requests:
       cpu: 200m
