@@ -38,7 +38,7 @@ mysql:
   image:
     repository: mysql # FIXED: Changed from 0xsaju/sample-login to mysql
     tag: "8.0" # FIXED: Using stable MySQL version
-  rootPassword: "${MYSQL_ROOT_PASSWORD}" # FIXED: Use environment variable
+  rootPassword: "mysecretpassword" # Match with app.py default
   database: sample_login
   service:
     port: 3306

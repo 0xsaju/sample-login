@@ -21,7 +21,7 @@ def get_db_config():
     return {
         'MYSQL_HOST': os.getenv('MYSQL_HOST', 'sample-login-mysql'),
         'MYSQL_USER': os.getenv('MYSQL_USER', 'root'),
-        'MYSQL_PASSWORD': os.getenv('MYSQL_PASSWORD', 'password123'),
+        'MYSQL_PASSWORD': os.getenv('MYSQL_PASSWORD', 'mysecretpassword'),
         'MYSQL_DB': os.getenv('MYSQL_DB', 'sample_login'),
         'MYSQL_PORT': int(os.getenv('MYSQL_PORT', 3306))
     }
@@ -78,6 +78,15 @@ app.config.update(
     MAIL_USE_TLS = True,
     MAIL_DEFAULT_SENDER = os.getenv('MAIL_USERNAME')
 )
+
+# MySQL configurations
+app.config.update(
+    MYSQL_HOST = os.getenv('MYSQL_HOST', 'sample-login-mysql'),
+    MYSQL_USER = os.getenv('MYSQL_USER', 'root'),
+    MYSQL_PASSWORD = os.getenv('MYSQL_PASSWORD', 'mysecretpassword'),
+    MYSQL_DB = os.getenv('MYSQL_DB', 'sample_login')
+)
+
 mail = Mail(app)
 
 # File upload configuration
