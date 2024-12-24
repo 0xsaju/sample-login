@@ -3,7 +3,7 @@ app:
   name: sample-login
   image:
     repository: 0xsaju/sample-login
-    tag: f546f8916d4d14e266a85445a3f05c81e1769795
+    tag: f15d7db9d3e9b29d1e457ba11e04c62ad2633834
     pullPolicy: Always
   service:
     type: ClusterIP
