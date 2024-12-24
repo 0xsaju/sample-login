@@ -3,7 +3,7 @@ app:
   name: sample-login
   image:
     repository: 0xsaju/sample-login
-    tag: 62ba88f5eb26fbee24011f305fef3c13b59489d6 # Will be updated by GitHub Actions
+    tag: 7f3bce2b89a4facf71349c4cb96ff33b32c7a67d # Will be updated by GitHub Actions
     pullPolicy: Always
   service:
     type: ClusterIP
