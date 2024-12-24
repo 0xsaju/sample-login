@@ -40,14 +40,23 @@ spec:
       initContainers:
         - name: check-db-ready
           image: mysql:8.0
-          command: ['sh', '-c', 'until mysql -h${MYSQL_HOST} -uroot -p${MYSQL_ROOT_PASSWORD} -e "SELECT 1"; do echo waiting for mysql; sleep 5; done']
+          command: 
+            - /bin/sh
+            - -c
+            - |
+              until mysql -h${MYSQL_HOST} -u${MYSQL_USER} -p${MYSQL_ROOT_PASSWORD} -e 'SELECT 1'; do
+                echo "Waiting for MySQL to be ready..."
+                sleep 5
+              done
           env:
             - name: MYSQL_HOST
-              value: "sample-login-mysql"
+              value: "{{ .Values.app.name }}-mysql"
+            - name: MYSQL_USER
+              value: "root"
             - name: MYSQL_ROOT_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: sample-login-mysql-secret
+                  name: {{ .Values.app.name }}-mysql-secret
                   key: mysql-root-password
       containers:
         - name: {{ .Values.app.name }}

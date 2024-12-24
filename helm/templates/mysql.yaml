@@ -25,9 +25,20 @@ spec:
       labels:
         app: {{ .Values.app.name }}-mysql
     spec:
+      securityContext:
+        fsGroup: 999
       containers:
         - name: mysql
           image: "{{ .Values.mysql.image.repository }}:{{ .Values.mysql.image.tag }}"
+          command:
+            - bash
+            - -c
+            - |
+              set -ex
+              # Initialize permissions
+              chown -R mysql:mysql /var/lib/mysql
+              # Start MySQL
+              docker-entrypoint.sh mysqld
           env:
             - name: MYSQL_ROOT_PASSWORD
               valueFrom:
@@ -36,6 +47,10 @@ spec:
                   key: mysql-root-password
             - name: MYSQL_DATABASE
               value: {{ .Values.mysql.database }}
+            - name: MYSQL_USER
+              value: root
+            - name: MYSQL_ROOT_HOST
+              value: "%"
           ports:
             - containerPort: 3306
           volumeMounts:
@@ -45,21 +60,32 @@ spec:
               mountPath: /docker-entrypoint-initdb.d
           resources:
             limits:
+              cpu: "1000m"
+              memory: "1Gi"
+            requests:
               cpu: "500m"
               memory: "512Mi"
-            requests:
-              cpu: "200m"
-              memory: "256Mi"
           readinessProbe:
             exec:
-              command: ["mysql", "-h", "127.0.0.1", "-uroot", "-p${MYSQL_ROOT_PASSWORD}", "-e", "SELECT 1"]
-            initialDelaySeconds: 30
-            periodSeconds: 2
-            timeoutSeconds: 1
+              command: 
+                - /bin/sh
+                - -c
+                - mysqladmin ping -h localhost -u root -p${MYSQL_ROOT_PASSWORD}
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
           startupProbe:
             exec:
-              command: ["mysql", "-h", "127.0.0.1", "-uroot", "-p${MYSQL_ROOT_PASSWORD}", "-e", "SELECT 1"]
-            initialDelaySeconds: 45
+              command: 
+                - /bin/sh
+                - -c
+                - mysqladmin ping -h localhost -u root -p${MYSQL_ROOT_PASSWORD}
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 30
+          securityContext:
+            runAsUser: 999
+            runAsGroup: 999
       volumes:
         - name: init-script
           configMap:
