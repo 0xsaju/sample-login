@@ -4,7 +4,7 @@ app:
   name: sample-login
   image:
     repository: 0xsaju/sample-login
-    tag: ac3ee02d2ee2d8f1ac5907be92a0b7b19e5fb2db
+    tag: 0fc1b17727569fd689490a02c73580f2f270bff8  # Will be updated by GitHub Actions
     pullPolicy: Always
   service:
     type: ClusterIP
@@ -39,9 +39,9 @@ ingress:
 
 mysql:
   image:
-    repository: 0xsaju/sample-login
-    tag: ac3ee02d2ee2d8f1ac5907be92a0b7b19e5fb2db
-  rootPassword: "mysecretpassword"
+    repository: mysql    # FIXED: Changed from 0xsaju/sample-login to mysql
+    tag: "8.0"          # FIXED: Using stable MySQL version
+  rootPassword: "${MYSQL_ROOT_PASSWORD}"  # FIXED: Use environment variable
   database: sample_login
   service:
     port: 3306
@@ -57,4 +57,3 @@ mysql:
     requests:
       cpu: 200m
       memory: 256Mi
-      #test

@@ -40,14 +40,23 @@ jobs:
 
       - name: Update Helm values
         run: |
-          git pull --rebase origin ${GITHUB_REF##*/}
-          sed -i "s|repository: .*|repository: ${{ env.DOCKER_IMAGE }}|" helm/values-prod.yaml
-          sed -i "s|tag: .*|tag: ${{ github.sha }}|" helm/values-prod.yaml
+          # Fetch latest changes first
+          git pull origin ${GITHUB_REF##*/} || true
+          
+          # Update only the app image tag, not MySQL
+          yq eval ".app.image.tag = \"${{ github.sha }}\"" -i helm/values-prod.yaml
+          
+          # Don't update MySQL image settings
+          if git diff --exit-code helm/values-prod.yaml; then
+            echo "No changes to commit"
+            exit 0
+          fi
 
       - name: Commit and push changes
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           git add helm/values-prod.yaml
-          git commit -m "chore: update image tag to ${{ github.sha }} [skip ci]" || echo "No changes to commit"
-          git push
+          git commit -m "chore: update app image tag to ${{ github.sha }} [skip ci]" || echo "No changes to commit"
+          # Use --force-if-includes instead of --force
+          git push --force-if-includes
