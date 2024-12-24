@@ -6,6 +6,10 @@ metadata:
   labels:
     app.kubernetes.io/name: {{ .Values.app.name }}
     app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+  annotations:
+    meta.helm.sh/release-name: {{ .Release.Name }}
+    meta.helm.sh/release-namespace: {{ .Release.Namespace }}
 data:
   init.sql: |-
 {{ .Files.Get "initial.sql" | indent 4 }}
