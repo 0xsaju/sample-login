@@ -51,3 +51,5 @@ flask_session/
 
 # Kubernetes
 **/kubeconfig
+
+helm/values-local.yaml

@@ -1,27 +1,29 @@
-replicaCount: 2 # Increase for HA
+replicaCount: 2  # Increase for HA
+
 app:
   name: sample-login
   image:
     repository: 0xsaju/sample-login
-    tag: b47bdba07438aa777a3fd8107f4fa783bfb795c0 # Will be updated by GitHub Actions
+    tag: 4d7cb63a9055671d95407427be527704f87ebc8b
     pullPolicy: Always
   service:
     type: ClusterIP
     port: 5000
   resources:
     limits:
-      cpu: "500m"
-      memory: "512Mi"
+      cpu: 300m      # Changed value to trigger sync
+      memory: 512Mi
     requests:
-      cpu: "200m"
-      memory: "256Mi"
+      cpu: 200m
+      memory: 256Mi
   uploads:
-    size: 5Gi # Increase for production
-    storageClass: "local-path" # Change to match your available storage class
+    size: 5Gi       # Increase for production
+    storageClass: "local-path"  # Change to match your available storage class
   env:
     MYSQL_HOST: "sample-login-mysql.sample-login.svc.cluster.local"
     MYSQL_PORT: "3306"
     MYSQL_DATABASE: "sample_login"
+
 ingress:
   enabled: true
   className: nginx
@@ -29,28 +31,30 @@ ingress:
     kubernetes.io/ingress.class: nginx
     nginx.ingress.kubernetes.io/rewrite-target: /
   hosts:
-    - host: "192.168.56.101.nip.io" # Changed to use nip.io for DNS resolution
+    - host: "192.168.56.101"  # You can use your node IP instead for testing
       paths:
         - path: /
           pathType: Prefix
-  tls: [] # Removed TLS for initial testing
+  tls: []  # Removed TLS for initial testing
+
 mysql:
   image:
-    repository: mysql # FIXED: Changed from 0xsaju/sample-login to mysql
-    tag: "8.0" # FIXED: Using stable MySQL version
-  rootPassword: "mysecretpassword" # Match with app.py default
+    repository: mysql  # Fix: don't use sample-login repository
+    tag: "8.0"
+  rootPassword: "mysecretpassword"
   database: sample_login
   service:
     port: 3306
     annotations:
       service.kubernetes.io/topology-aware-hints: auto
   persistence:
-    size: 1Gi
+    size: 1Gi      # Reduced for testing
     storageClass: "local-path"
   resources:
     limits:
-      cpu: 500m # Reduced for testing
+      cpu: 500m    # Reduced for testing
       memory: 512Mi
     requests:
       cpu: 200m
       memory: 256Mi
+      #test
