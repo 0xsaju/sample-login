@@ -1,4 +1,4 @@
-replicaCount: 2
+replicaCount: 1
 
 app:
   name: sample-login
@@ -9,37 +9,25 @@ app:
   service:
     type: ClusterIP
     port: 5000
-  resources:
-    limits:
-      cpu: 500m
-      memory: 512Mi
-    requests:
-      cpu: 200m
-      memory: 256Mi
-  uploads:
-    size: 1Gi
-    storageClass: standard
 
 ingress:
   enabled: true
   className: nginx
-  annotations: {}  # Changed to empty map
   hosts:
     - host: 192.168.56.101
       paths:
         - path: /
           pathType: Prefix
-  tls: []  # Add empty TLS config for development
 
 mysql:
   image:
     repository: mysql
-    tag: 8.0
-  rootPassword: AppDBPass
+    tag: "8.0"
+  rootPassword: "mysecretpassword"  # Change this in production
   database: sample_login
-  initializationEnabled: true
   service:
     port: 3306
   persistence:
     size: 1Gi
-    storageClass: standard
+    storageClass: "local-path"  # Change based on your cluster's storage class
+  initializationEnabled: true

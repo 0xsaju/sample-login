@@ -7,8 +7,8 @@ from diagrams.onprem.database import MySQL
 from diagrams.onprem.compute import Server
 from diagrams.programming.framework import Flask
 from diagrams.onprem.container import Docker
-from diagrams.onprem.ci import GithubActions  # Updated import
-from diagrams.onprem.gitops import ArgoCD    # Updated import
+from diagrams.onprem.ci import GithubActions
+from diagrams.onprem.gitops import ArgoCD
 from diagrams.onprem.vcs import Github
 from diagrams.onprem.client import Users
 
@@ -58,6 +58,5 @@ with Diagram("Sample Login Application Architecture", show=True, direction="TB")
     # CI/CD Flow
     github >> github_actions
     github_actions >> dockerhub
-    github_actions >> github
-    github << argocd
+    dockerhub >> argocd
     argocd >> app_pods

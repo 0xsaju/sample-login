@@ -9,14 +9,54 @@ from datetime import datetime, timedelta
 from flask_mail import Mail, Message
 import hashlib
 import os
+import time
 from werkzeug.utils import secure_filename  # Add at the top with other imports
 from dotenv import load_dotenv
 load_dotenv()  # Add this near the top of the file
 
 app = Flask(__name__)
 
+# Enhanced MySQL configuration with retry logic
+def get_db_config():
+    return {
+        'MYSQL_HOST': os.getenv('MYSQL_HOST', 'sample-login-mysql'),
+        'MYSQL_USER': os.getenv('MYSQL_USER', 'root'),
+        'MYSQL_PASSWORD': os.getenv('MYSQL_PASSWORD', 'password123'),
+        'MYSQL_DB': os.getenv('MYSQL_DB', 'sample_login'),
+        'MYSQL_PORT': int(os.getenv('MYSQL_PORT', 3306))
+    }
+
+# Configure MySQL with retry mechanism
+def configure_mysql(app):
+    db_config = get_db_config()
+    app.config.update(db_config)
+    
+    mysql = MySQL(app)
+    
+    # Try to connect to MySQL with retries
+    max_retries = 30
+    retry_delay = 2
+    
+    for attempt in range(max_retries):
+        try:
+            conn = mysql.connect()
+            conn.close()
+            print("Successfully connected to MySQL!")
+            return mysql
+        except Exception as e:
+            if attempt < max_retries - 1:
+                print(f"Failed to connect to MySQL (attempt {attempt + 1}/{max_retries}): {str(e)}")
+                print(f"Retrying in {retry_delay} seconds...")
+                time.sleep(retry_delay)
+            else:
+                print("Failed to connect to MySQL after all retries")
+                raise e
+
+# Initialize MySQL with retry logic
+mysql = configure_mysql(app)
+
 # Secret key for session management
-app.secret_key = 'your-secret-key-here'  # Change this to a secure random string
+app.secret_key = os.getenv('SECRET_KEY', 'your-secret-key-here')
 
 # CSRF protection
 csrf = CSRFProtect(app)
@@ -28,16 +68,6 @@ app.config.update(
     SESSION_COOKIE_SAMESITE='Lax',
     PERMANENT_SESSION_LIFETIME=timedelta(minutes=30)
 )
-
-# MySQL configurations
-app.config.update(
-    MYSQL_HOST = os.getenv('MYSQL_HOST', 'localhost'),
-    MYSQL_USER = os.getenv('MYSQL_USER', 'root'),
-    MYSQL_PASSWORD = os.getenv('MYSQL_PASSWORD', 'AppDBPass'),
-    MYSQL_DB = os.getenv('MYSQL_DB', 'sample_login')
-)
-
-mysql = MySQL(app)
 
 # Email configuration
 app.config.update(
@@ -403,9 +433,23 @@ def profile_settings():
 @app.route('/health')
 def health():
     try:
-        return {'status': 'healthy', 'version': '1.0.1'}, 200  # Added version
+        # Test MySQL connection
+        cursor = mysql.connection.cursor()
+        cursor.execute('SELECT 1')
+        cursor.close()
+        return {
+            'status': 'healthy',
+            'version': '1.0.1',
+            'database': 'connected'
+        }, 200
     except Exception as e:
-        return {'status': 'unhealthy', 'error': str(e)}, 500
+        return {
+            'status': 'unhealthy',
+            'error': str(e),
+            'database': 'disconnected'
+        }, 500
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)  # Remove debug=False
+    port = int(os.getenv('PORT', 5000))
+    host = os.getenv('HOST', '0.0.0.0')
+    app.run(host=host, port=port)

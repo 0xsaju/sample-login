@@ -8,18 +8,18 @@ on:
 
 env:
   DOCKER_IMAGE: 0xsaju/sample-login
-  
+
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
     permissions:
-      contents: write  # Add this permission
+      contents: write
     steps:
       - uses: actions/checkout@v3
         with:
-          token: ${{ secrets.PAT_TOKEN }}  # Updated to match repo secret name
-          fetch-depth: 0  # Fetch all history
-      
+          token: ${{ secrets.PAT_TOKEN }}
+          fetch-depth: 0
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
       
@@ -40,17 +40,14 @@ jobs:
 
       - name: Update Helm values
         run: |
-          git pull --rebase origin dev_ci_cd_v1
+          git pull --rebase origin ${GITHUB_REF##*/}
           sed -i "s|repository: .*|repository: ${{ env.DOCKER_IMAGE }}|" helm/values-prod.yaml
           sed -i "s|tag: .*|tag: ${{ github.sha }}|" helm/values-prod.yaml
 
       - name: Commit and push changes
-        env:
-          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}  # Updated to match repo secret name
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}
           git add helm/values-prod.yaml
           git commit -m "chore: update image tag to ${{ github.sha }} [skip ci]" || echo "No changes to commit"
-          git push --force-with-lease
+          git push

@@ -9,15 +9,11 @@ spec:
   ports:
     - port: {{ .Values.mysql.service.port }}
       targetPort: 3306
-  type: ClusterIP
 ---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: {{ .Values.app.name }}-mysql
-  labels:
-    app.kubernetes.io/name: {{ .Values.app.name }}-mysql
-    app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   serviceName: {{ .Values.app.name }}-mysql
   replicas: 1
@@ -28,19 +24,10 @@ spec:
     metadata:
       labels:
         app: {{ .Values.app.name }}-mysql
-        app.kubernetes.io/name: {{ .Values.app.name }}-mysql
-        app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
-      securityContext:
-        fsGroup: 999
-      nodeSelector:
-        kubernetes.io/hostname: master
       containers:
         - name: mysql
-          image: "mysql:8.0"  # Change to official MySQL image
-          ports:
-            - containerPort: 3306
-              name: mysql
+          image: "{{ .Values.mysql.image.repository }}:{{ .Values.mysql.image.tag }}"
           env:
             - name: MYSQL_ROOT_PASSWORD
               valueFrom:
@@ -49,57 +36,26 @@ spec:
                   key: mysql-root-password
             - name: MYSQL_DATABASE
               value: {{ .Values.mysql.database }}
-            - name: MYSQL_USER
-              value: root
+          ports:
+            - containerPort: 3306
           volumeMounts:
-            - name: data
+            - name: mysql-data
               mountPath: /var/lib/mysql
             - name: init-script
               mountPath: /docker-entrypoint-initdb.d
-          resources:
-            limits:
-              cpu: "500m"
-              memory: "512Mi"
-            requests:
-              cpu: "200m"
-              memory: "256Mi"
-          startupProbe:
-            exec:
-              command: 
-                - /bin/sh
-                - -c
-                - "mysqladmin ping -u root -p${MYSQL_ROOT_PASSWORD}"
-            initialDelaySeconds: 60
-            periodSeconds: 10
-            failureThreshold: 30
           readinessProbe:
             exec:
-              command:
-                - /bin/sh
-                - -c
-                - "mysqladmin ping -u root -p${MYSQL_ROOT_PASSWORD}"
-            initialDelaySeconds: 20
-            periodSeconds: 10
-            timeoutSeconds: 5
-          livenessProbe:
-            exec:
-              command:
-                - /bin/sh
-                - -c
-                - "mysqladmin ping -u root -p${MYSQL_ROOT_PASSWORD}"
-            initialDelaySeconds: 30
-            periodSeconds: 10
-            timeoutSeconds: 5
-          securityContext:
-            runAsUser: 999
-            runAsNonRoot: true
+              command: ["mysql", "-h", "127.0.0.1", "-uroot", "-p${MYSQL_ROOT_PASSWORD}", "-e", "SELECT 1"]
+            initialDelaySeconds: 5
+            periodSeconds: 2
+            timeoutSeconds: 1
       volumes:
         - name: init-script
           configMap:
             name: {{ .Values.app.name }}-init-sql
   volumeClaimTemplates:
     - metadata:
-        name: data
+        name: mysql-data
       spec:
         accessModes: [ "ReadWriteOnce" ]
         storageClassName: {{ .Values.mysql.persistence.storageClass }}

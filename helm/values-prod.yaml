@@ -11,14 +11,18 @@ app:
     port: 5000
   resources:
     limits:
-      cpu: 300m      # Changed value to trigger sync
-      memory: 512Mi
+      cpu: "500m"
+      memory: "512Mi"
     requests:
-      cpu: 200m
-      memory: 256Mi
+      cpu: "200m"
+      memory: "256Mi"
   uploads:
     size: 5Gi       # Increase for production
     storageClass: "local-path"  # Change to match your available storage class
+  env:
+    MYSQL_HOST: "sample-login-mysql.sample-login.svc.cluster.local"
+    MYSQL_PORT: "3306"
+    MYSQL_DATABASE: "sample_login"
 
 ingress:
   enabled: true
@@ -35,12 +39,14 @@ ingress:
 
 mysql:
   image:
-    repository: 0xsaju/sample-login
-    tag: 4d7cb63a9055671d95407427be527704f87ebc8b
+    repository: mysql  # Fix: don't use sample-login repository
+    tag: "8.0"
   rootPassword: "mysecretpassword"
   database: sample_login
   service:
     port: 3306
+    annotations:
+      service.kubernetes.io/topology-aware-hints: auto
   persistence:
     size: 1Gi      # Reduced for testing
     storageClass: "local-path"

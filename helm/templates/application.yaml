@@ -20,7 +20,6 @@ spec:
   ports:
     - port: {{ .Values.app.service.port }}
       targetPort: 5000
-      protocol: TCP
   selector:
     app: {{ .Values.app.name }}
 ---
@@ -28,9 +27,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Values.app.name }}
-  labels:
-    app.kubernetes.io/name: {{ .Values.app.name }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
@@ -40,70 +36,33 @@ spec:
     metadata:
       labels:
         app: {{ .Values.app.name }}
-        app.kubernetes.io/name: {{ .Values.app.name }}
-        app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 1000
-      nodeSelector:
-        kubernetes.io/hostname: master
       initContainers:
-        - name: wait-for-mysql
-          image: busybox:1.28
-          command: ['sh', '-c', 'until nc -z -v -w30 {{ .Values.app.name }}-mysql {{ .Values.mysql.service.port }}; do echo waiting for mysql; sleep 5; done']
+        - name: check-db-ready
+          image: mysql:8.0
+          command: ['sh', '-c', 
+            'until mysql -h{{ .Values.app.name }}-mysql -uroot -p${MYSQL_ROOT_PASSWORD} -e "SELECT 1"; do echo waiting for mysql; sleep 2; done']
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.app.name }}-mysql-secret
+                  key: mysql-root-password
       containers:
         - name: {{ .Values.app.name }}
           image: "{{ .Values.app.image.repository }}:{{ .Values.app.image.tag }}"
-          imagePullPolicy: Always  # Force pull new images
-          resources:
-            {{- toYaml .Values.app.resources | nindent 12 }}
-          livenessProbe:
-            httpGet:
-              path: /health
-              port: 5000  # Fixed port number
-            initialDelaySeconds: 10
-            periodSeconds: 30
-            timeoutSeconds: 5
-            failureThreshold: 3
-          readinessProbe:
-            httpGet:
-              path: /health
-              port: 5000
-            initialDelaySeconds: 30  # Increase delay
-            periodSeconds: 10
-            timeoutSeconds: 5
-            failureThreshold: 6    # Increase threshold
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 5000
           env:
-            - name: FLASK_APP
-              value: "app.py"
-            - name: FLASK_ENV
-              value: "production"
             - name: MYSQL_HOST
               value: {{ .Values.app.name }}-mysql
             - name: MYSQL_USER
               value: root
             - name: MYSQL_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.app.name }}-mysql-secret
-                  key: mysql-root-password
+              value: {{ .Values.mysql.rootPassword }}
             - name: MYSQL_DB
               value: {{ .Values.mysql.database }}
-          ports:
-            - containerPort: 5000
-          volumeMounts:
-            - name: uploads
-              mountPath: /app/static/uploads
-          securityContext:
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop:
-                - ALL
-      volumes:
-        - name: uploads
-          persistentVolumeClaim:
-            claimName: {{ .Values.app.name }}-uploads-pvc
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
