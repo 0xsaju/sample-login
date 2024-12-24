@@ -13,8 +13,6 @@ spec:
       labels:
         app: {{ .Values.app.name }}-mysql
     spec:
-      securityContext:
-        fsGroup: 999
       containers:
         - name: mysql
           image: "{{ .Values.mysql.image.repository }}:{{ .Values.mysql.image.tag }}"
@@ -26,10 +24,6 @@ spec:
                   key: mysql-root-password
             - name: MYSQL_DATABASE
               value: {{ .Values.mysql.database }}
-            - name: MYSQL_USER
-              value: root
-            - name: MYSQL_ROOT_HOST
-              value: "%"
           ports:
             - containerPort: 3306
           volumeMounts:
@@ -44,31 +38,17 @@ spec:
             requests:
               cpu: "500m"
               memory: "512Mi"
-          readinessProbe:
-            exec:
-              command: 
-                - /bin/sh
-                - -c
-                - mysqladmin ping -h localhost -u root -p${MYSQL_ROOT_PASSWORD}
-            initialDelaySeconds: 15
-            periodSeconds: 10
-            timeoutSeconds: 5
           startupProbe:
             exec:
-              command: 
-                - /bin/sh
-                - -c
-                - mysqladmin ping -h localhost -u root -p${MYSQL_ROOT_PASSWORD}
+              command: ["mysqladmin", "ping", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
             initialDelaySeconds: 30
             periodSeconds: 10
             failureThreshold: 30
-          securityContext:
-            runAsUser: 999
-            runAsGroup: 999
       volumes:
         - name: init-script
           configMap:
             name: {{ .Values.app.name }}-init-sql
+            defaultMode: 0755
   volumeClaimTemplates:
     - metadata:
         name: mysql-data
