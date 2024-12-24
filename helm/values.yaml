@@ -9,6 +9,16 @@ app:
   service:
     type: ClusterIP
     port: 5000
+  uploads:
+    size: 1Gi
+    storageClass: "local-path"
+  resources:
+    limits:
+      cpu: "500m"
+      memory: "512Mi"
+    requests:
+      cpu: "200m"
+      memory: "256Mi"
 
 ingress:
   enabled: true
