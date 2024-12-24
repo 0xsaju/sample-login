@@ -39,16 +39,16 @@ ingress:
 
 mysql:
   image:
-    repository: 0xsaju/sample-login
-    tag: 4d7cb63a9055671d95407427be527704f87ebc8b
-  rootPassword: "mysecretpassword"
+    repository: mysql  # Fixed: Changed from 0xsaju/sample-login to mysql
+    tag: "8.0"
+  rootPassword: "${MYSQL_ROOT_PASSWORD}"  # Use env var instead of plain text
   database: sample_login
   service:
     port: 3306
     annotations:
       service.kubernetes.io/topology-aware-hints: auto
   persistence:
-    size: 1Gi      # Reduced for testing
+    size: 1Gi
     storageClass: "local-path"
   resources:
     limits:

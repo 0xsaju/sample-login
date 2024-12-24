@@ -60,7 +60,10 @@ spec:
             - name: MYSQL_USER
               value: root
             - name: MYSQL_PASSWORD
-              value: {{ .Values.mysql.rootPassword }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.app.name }}-mysql-secret
+                  key: mysql-root-password
             - name: MYSQL_DB
               value: {{ .Values.mysql.database }}
 ---
