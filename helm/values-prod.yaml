@@ -3,7 +3,7 @@ app:
   name: sample-login
   image:
     repository: 0xsaju/sample-login
-    tag: f15d7db9d3e9b29d1e457ba11e04c62ad2633834
+    tag: f546f8916d4d14e266a85445a3f05c81e1769795
     pullPolicy: Always
   service:
     type: ClusterIP
@@ -18,10 +18,7 @@ app:
   uploads:
     size: 5Gi # Increase for production
     storageClass: "local-path" # Change to match your available storage class
-  env:
-    MYSQL_HOST: "sample-login-mysql.sample-login.svc.cluster.local"
-    MYSQL_PORT: "3306"
-    MYSQL_DATABASE: "sample_login"
+
 ingress:
   enabled: true
   className: nginx
@@ -34,24 +31,3 @@ ingress:
         - path: /
           pathType: Prefix
   tls: [] # Removed TLS for initial testing
-mysql:
-  image:
-    repository: mysql # Fix: don't use sample-login repository
-    tag: "8.0"
-  rootPassword: "mysecretpassword"
-  database: sample_login
-  service:
-    port: 3306
-    annotations:
-      service.kubernetes.io/topology-aware-hints: auto
-  persistence:
-    size: 1Gi # Reduced for testing
-    storageClass: "local-path"
-  resources:
-    limits:
-      cpu: 500m # Reduced for testing
-      memory: 512Mi
-    requests:
-      cpu: 200m
-      memory: 256Mi
-      #test

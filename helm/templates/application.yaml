@@ -37,45 +37,12 @@ spec:
       labels:
         app: {{ .Values.app.name }}
     spec:
-      initContainers:
-        - name: check-db-ready
-          image: mysql:8.0
-          command: 
-            - /bin/sh
-            - -c
-            - |
-              until mysql -h${MYSQL_HOST} -u${MYSQL_USER} -p${MYSQL_ROOT_PASSWORD} -e 'SELECT 1'; do
-                echo "Waiting for MySQL to be ready..."
-                sleep 5
-              done
-          env:
-            - name: MYSQL_HOST
-              value: "{{ .Values.app.name }}-mysql"
-            - name: MYSQL_USER
-              value: "root"
-            - name: MYSQL_ROOT_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.app.name }}-mysql-secret
-                  key: mysql-root-password
       containers:
         - name: {{ .Values.app.name }}
           image: "{{ .Values.app.image.repository }}:{{ .Values.app.image.tag }}"
           imagePullPolicy: Always
           ports:
             - containerPort: 5000
-          env:
-            - name: MYSQL_HOST
-              value: {{ .Values.app.name }}-mysql
-            - name: MYSQL_USER
-              value: root
-            - name: MYSQL_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.app.name }}-mysql-secret
-                  key: mysql-root-password
-            - name: MYSQL_DB
-              value: {{ .Values.mysql.database }}
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress

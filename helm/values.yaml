@@ -28,16 +28,3 @@ ingress:
       paths:
         - path: /
           pathType: Prefix
-
-mysql:
-  image:
-    repository: mysql
-    tag: "8.0"
-  rootPassword: "mysecretpassword"  # Change this in production
-  database: sample_login
-  service:
-    port: 3306
-  persistence:
-    size: 1Gi
-    storageClass: "local-path"  # Change based on your cluster's storage class
-  initializationEnabled: true
