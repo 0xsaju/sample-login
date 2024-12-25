@@ -7,11 +7,11 @@ spec:
   project: default
   source:
     repoURL: https://github.com/0xsaju/sample-login.git
-    targetRevision: dev_ci_cd_without_mysql  # Correct branch
+    targetRevision: dev_ci_cd_without_mysql
     path: helm
     helm:
       valueFiles:
-        - values-prod.yaml  # Using prod values
+        - values-prod.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: sample-login
@@ -19,11 +19,5 @@ spec:
     automated:
       prune: true
       selfHeal: true
-    retry:
-      limit: 5
-      backoff:
-        duration: 5s
-        factor: 2
-        maxDuration: 3m
     syncOptions:
       - CreateNamespace=true
