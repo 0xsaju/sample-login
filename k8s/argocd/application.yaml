@@ -3,6 +3,8 @@ kind: Application
 metadata:
   name: sample-login
   namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   source:
@@ -13,8 +15,10 @@ spec:
       valueFiles:
         - values-prod.yaml
       parameters:
-        - name: "app.image.tag"
-          value: "latest"
+        - name: app.image.repository
+          value: 0xsaju/sample-login
+        - name: app.image.tag
+          value: latest
   destination:
     server: https://kubernetes.default.svc
     namespace: sample-login
@@ -22,12 +26,6 @@ spec:
     automated:
       prune: true
       selfHeal: true
-    retry:
-      limit: 5
-      backoff:
-        duration: 5s
-        factor: 2
-        maxDuration: 3m
     syncOptions:
       - CreateNamespace=true
-      - ServerSideApply=true
+      - RespectIgnoreDifferences=true
