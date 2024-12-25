@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sample-login
+  namespace: sample-login
+spec:
+  replicas: 2  # Matches prod value
+  selector:
+    matchLabels:
+      app: sample-login
+  template:
+    metadata:
+      labels:
+        app: sample-login
+    spec:
+      containers:
+        - name: sample-login
+          image: 0xsaju/sample-login:latest  # Using latest tag for manual deployment
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 5000
+          resources:
+            limits:
+              cpu: "300m"      # Synced with Helm values
+              memory: "512Mi"
+            requests:
+              cpu: "200m"
+              memory: "256Mi"

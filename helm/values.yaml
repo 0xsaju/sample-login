@@ -3,7 +3,7 @@ replicaCount: 1
 app:
   name: sample-login
   image:
-    repository: sample-login
+    repository: 0xsaju/sample-login  # Updated to match prod
     tag: latest
     pullPolicy: Always
   service:
@@ -14,7 +14,7 @@ app:
     storageClass: "local-path"
   resources:
     limits:
-      cpu: "500m"
+      cpu: "300m"      # Synced with prod
       memory: "512Mi"
     requests:
       cpu: "200m"
@@ -24,7 +24,7 @@ ingress:
   enabled: true
   className: nginx
   hosts:
-    - host: 192.168.56.101
+    - host: "192.168.56.101.nip.io"  # Updated to use nip.io
       paths:
         - path: /
           pathType: Prefix
