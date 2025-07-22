@@ -78,51 +78,39 @@
     <nav class="navbar">
         <div class="logo">Edit Profile</div>
         <div>
-            <a href="{{ url_for('profile') }}" class="btn" style="margin-right: 10px;">View Profile</a>
-            <a href="{{ url_for('welcome') }}" class="btn">Dashboard</a>
+            <a href="profile.html" class="btn" style="margin-right: 10px;">View Profile</a>
+            <a href="welcome.html" class="btn">Dashboard</a>
         </div>
     </nav>
     <div class="container">
         <div class="settings-card">
-            <form method="post" enctype="multipart/form-data">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <div class="avatar-upload">
-                    <img src="{{ user.avatar_url or url_for('static', filename='default-avatar.png') }}" 
-                         alt="Current Avatar" class="current-avatar">
-                    <input type="file" name="avatar" accept="image/*">
+            <form action="#" method="post" enctype="multipart/form-data" id="settings-form">
+                <div class="form-group">
+                    <label for="first_name">First Name</label>
+                    <input type="text" name="first_name" id="first_name">
                 </div>
                 <div class="form-group">
-                    <label>First Name</label>
-                    <input type="text" name="first_name" value="{{ user.first_name or '' }}">
+                    <label for="last_name">Last Name</label>
+                    <input type="text" name="last_name" id="last_name">
                 </div>
                 <div class="form-group">
-                    <label>Last Name</label>
-                    <input type="text" name="last_name" value="{{ user.last_name or '' }}">
+                    <label for="phone">Phone</label>
+                    <input type="text" name="phone" id="phone">
                 </div>
                 <div class="form-group">
-                    <label>Email</label>
-                    <input type="email" name="email" value="{{ user.email }}" readonly>
+                    <label for="country">Country</label>
+                    <input type="text" name="country" id="country">
                 </div>
                 <div class="form-group">
-                    <label>Phone</label>
-                    <input type="tel" name="phone" value="{{ user.phone or '' }}">
+                    <label for="bio">Bio</label>
+                    <textarea name="bio" id="bio"></textarea>
                 </div>
                 <div class="form-group">
-                    <label>Country</label>
-                    <input type="text" name="country" value="{{ user.country or '' }}">
-                </div>
-                <div class="form-group">
-                    <label>Bio</label>
-                    <textarea name="bio" rows="4">{{ user.bio or '' }}</textarea>
+                    <label for="avatar">Avatar</label>
+                    <input type="file" name="avatar" id="avatar" accept="image/*">
                 </div>
                 <button type="submit" class="btn">Save Changes</button>
-                {% with messages = get_flashed_messages() %}
-                    {% if messages %}
-                        {% for message in messages %}
-                            <div class="msg">{{ message }}</div>
-                        {% endfor %}
-                    {% endif %}
-                {% endwith %}
+                <div id="settings-message" style="color: red; margin-bottom: 1em;"></div>
             </form>
             <hr style="margin: 2rem 0; border: none; border-top: 2px solid #eee;">
             <h3 style="margin-bottom: 1.5rem; color: #333;">Change Password</h3>
@@ -143,5 +131,55 @@
             </form>
         </div>
     </div>
+    <script>
+function fillProfileForm(user) {
+  document.getElementById('first_name').value = user.first_name || '';
+  document.getElementById('last_name').value = user.last_name || '';
+  document.getElementById('phone').value = user.phone || '';
+  document.getElementById('country').value = user.country || '';
+  document.getElementById('bio').value = user.bio || '';
+  // Optionally update avatar preview if you have one
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  // On page load, fetch user data and fill form
+  fetch('http://localhost:5001/profile', { credentials: 'include' })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) fillProfileForm(data.user);
+    });
+
+  // On form submit, update form fields with new data from response
+  const settingsForm = document.getElementById('settings-form');
+  if (settingsForm) {
+    settingsForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const formData = new FormData(settingsForm);
+      fetch('http://localhost:5001/profile/settings', {
+        method: 'POST',
+        body: formData,
+        credentials: 'include'
+      })
+      .then(res => res.json())
+      .then(data => {
+        const messageDiv = document.getElementById('settings-message');
+        if (data.success) {
+          messageDiv.textContent = data.message;
+          messageDiv.style.color = 'green';
+          if (data.user) fillProfileForm(data.user); // Update form fields with new data
+        } else {
+          messageDiv.textContent = data.message;
+          messageDiv.style.color = 'red';
+        }
+      })
+      .catch(err => {
+        const messageDiv = document.getElementById('settings-message');
+        messageDiv.textContent = 'Error: ' + err;
+        messageDiv.style.color = 'red';
+      });
+    });
+  }
+});
+</script>
 </body>
 </html>

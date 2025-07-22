@@ -89,10 +89,9 @@
     <nav class="navbar">
         <div class="logo">Profile</div>
         <div>
-            <a href="{{ url_for('profile_settings') }}" class="btn" style="margin-right: 10px;">Edit Profile</a>
-            <a href="{{ url_for('welcome') }}" class="btn" style="margin-right: 10px;">Dashboard</a>
-            <form action="{{ url_for('logout') }}" method="post" style="display: inline;">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <a href="profile_settings.html" class="btn" style="margin-right: 10px;">Edit Profile</a>
+            <a href="welcome.html" class="btn" style="margin-right: 10px;">Dashboard</a>
+            <form action="#" method="post" id="logout-form" style="display: inline;">
                 <button type="submit" class="btn">Logout</button>
             </form>
         </div>
@@ -100,37 +99,52 @@
     <div class="container">
         <div class="profile-card">
             <div class="profile-header">
-                <img src="{{ user.avatar_url or url_for('static', filename='default-avatar.png') }}" alt="Profile Picture" class="avatar">
+                <div id="profile-picture"></div>
                 <div class="profile-info">
-                    <h1>{{ user.first_name }} {{ user.last_name }}</h1>
-                    <p>@{{ user.username }}</p>
+                    <h1 id="profile-name"></h1>
+                    <p id="profile-username"></p>
                 </div>
             </div>
             <div class="profile-details">
-                <div class="detail-item">
-                    <div class="detail-label">Email</div>
-                    <div class="detail-value">{{ user.email }}</div>
-                </div>
-                <div class="detail-item">
-                    <div class="detail-label">Phone</div>
-                    <div class="detail-value">{{ user.phone or 'Not set' }}</div>
-                </div>
-                <div class="detail-item">
-                    <div class="detail-label">Country</div>
-                    <div class="detail-value">{{ user.country or 'Not set' }}</div>
-                </div>
-                <div class="detail-item">
-                    <div class="detail-label">Member Since</div>
-                    <div class="detail-value">{{ user.created_at.strftime('%B %Y') }}</div>
-                </div>
+                <div>Email<br><span id="profile-email"></span></div>
+                <div>Phone<br><span id="profile-phone"></span></div>
+                <div>Country<br><span id="profile-country"></span></div>
+                <div>Member Since<br><span id="profile-member-since"></span></div>
             </div>
-            {% if user.bio %}
-            <div class="detail-item" style="margin-top: 1.5rem;">
-                <div class="detail-label">Bio</div>
-                <div class="detail-value">{{ user.bio }}</div>
+            <div id="profile-bio-section" style="display:none;">
+                <div>Bio</div>
+                <div id="profile-bio"></div>
             </div>
-            {% endif %}
         </div>
     </div>
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+  fetch('http://localhost:5001/profile', {
+    credentials: 'include'
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      const user = data.user;
+      document.getElementById('profile-name').textContent = `${user.first_name || ''} ${user.last_name || ''}`.trim();
+      document.getElementById('profile-username').textContent = user.username ? '@' + user.username : '';
+      document.getElementById('profile-email').textContent = user.email || 'Not set';
+      document.getElementById('profile-phone').textContent = user.phone || 'Not set';
+      document.getElementById('profile-country').textContent = user.country || 'Not set';
+      if (user.created_at) {
+        const date = new Date(user.created_at);
+        document.getElementById('profile-member-since').textContent = date.toLocaleString('default', { month: 'long', year: 'numeric' });
+      } else {
+        document.getElementById('profile-member-since').textContent = 'Not set';
+      }
+      if (user.bio) {
+        document.getElementById('profile-bio-section').style.display = '';
+        document.getElementById('profile-bio').textContent = user.bio;
+      }
+      // Optionally handle avatar/profile picture here if you want
+    }
+  });
+});
+</script>
 </body>
 </html>

@@ -1,0 +1,101 @@
+name: Build, Push to ACR, and Deploy to Azure VM
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  ACR_NAME: 0xsajuacr 
+  VM_HOST: 4.157.244.250
+  VM_USERNAME: sazzad 
+  IMAGE_NAME: flask-app
+  IMAGE_TAG: v1-amd64
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Verify directory structure
+        run: |
+          echo "Current directory: $(pwd)"
+          echo "Directory contents:"
+          ls -la
+          
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Azure Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.ACR_NAME }}.azurecr.io
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+
+      - name: Build and Push Docker image to ACR (linux/amd64)
+        id: docker_build
+        run: |
+          if [ ! -f "Dockerfile" ]; then
+            echo "Error: Dockerfile not found in current directory"
+            pwd
+            ls -la
+            exit 1
+          fi
+          
+          docker buildx build \
+            --platform linux/amd64 \
+            -t ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} \
+            . \
+            --push
+
+      - name: Deploy to Azure VM via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ env.VM_HOST }}
+          username: ${{ env.VM_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            echo "Logging into ACR..."
+            if ! sudo docker login ${{ env.ACR_NAME }}.azurecr.io \
+              --username "${{ secrets.ACR_USERNAME }}" \
+              --password "${{ secrets.ACR_PASSWORD }}"; then
+              echo "Failed to login to ACR"
+              exit 1
+            fi
+
+            if [ "$(sudo docker ps -q -f name=${{ env.IMAGE_NAME }})" ]; then
+              echo "Stopping existing container..."
+              sudo docker stop ${{ env.IMAGE_NAME }}
+              echo "Removing existing container..."
+              sudo docker rm ${{ env.IMAGE_NAME }}
+            else
+              echo "No existing container named ${{ env.IMAGE_NAME }} found."
+            fi
+
+            echo "Pulling latest image from ACR..."
+            sudo docker pull ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+
+            echo "Running new container..."
+            sudo docker run -d -p 80:80 --name ${{ env.IMAGE_NAME }} ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+
+            echo "Verifying container status..."
+            if ! sudo docker ps | grep -q "${{ env.IMAGE_NAME }}"; then
+              echo "Container failed to start!"
+              exit 1
+            fi
+
+            echo "Waiting for container to initialize..."
+            sleep 10
+
+            if ! curl -f http://localhost:80/; then
+              echo "Container health check failed!"
+              exit 1
+            fi
+
+            echo "Deployment complete and verified!"
